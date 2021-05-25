@@ -1,0 +1,10 @@
+@import "~antd/dist/antd.css";
+@import "./config.scss";
+
+.drop-zone {
+  background: $white;
+  text-align: center;
+  padding: 3rem;
+  margin: 1rem;
+  cursor: pointer;
+}

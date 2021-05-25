@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "outDir": "build",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
+    },
+    "skipLibCheck": true
+  },
+  "include": ["electron/**/*"],
+  "exclude": ["node_modules"]
+}

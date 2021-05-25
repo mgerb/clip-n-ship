@@ -1,0 +1,59 @@
+{
+  "name": "create-react-app-typescript",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/icons": "^4.6.2",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^13.1.9",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.6.0",
+    "@types/react": "^17.0.6",
+    "@types/react-dom": "^17.0.0",
+    "@types/video.js": "^7.3.17",
+    "antd": "^4.15.6",
+    "electron": "^12.0.9",
+    "node-sass": "^5.0.0",
+    "npm-run-all": "^4.1.5",
+    "plyr": "^3.6.8",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.1.2",
+    "video.js": "^7.11.8",
+    "web-vitals": "^1.0.1"
+  },
+  "scripts": {
+    "electron:build": "tsc -p tsconfig.electron.json",
+    "electron:watch": "tsc -w -p tsconfig.electron.json",
+    "electron:start": "npm run electron:build && electron ./build/main.js",
+    "react:start": "react-scripts start",
+    "react:build": "PUBLIC_URL=./ react-scripts build",
+    "react:test": "react-scripts test",
+    "start": "run-p react:start electron:start",
+    "start:prod": "NODE_ENV=production electron ./build/main.js",
+    "build": "rimraf build && run-s react:build electron:build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+.progress {
+  &__container {
+    position: relative;
+    .ant-slider-handle {
+      z-index: 1;
+    }
+  }
+
+  &__bar-range {
+    pointer-events: none;
+    position: absolute;
+    height: 4px;
+    background: #faad14;
+    top: 4px;
+  }
+}
