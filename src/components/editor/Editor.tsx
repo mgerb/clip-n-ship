@@ -13,11 +13,12 @@ interface IProps {
 }
 
 interface IState {
-  currentTime?: number;
-  duration?: number;
-  min?: number;
-  max?: number;
+  currentTime: number;
+  duration: number;
+  min: number;
+  max: number;
   playing: boolean;
+  ready: boolean;
 }
 
 export class Editor extends React.Component<IProps, IState> {
@@ -27,67 +28,82 @@ export class Editor extends React.Component<IProps, IState> {
     super(props);
     this.state = {
       playing: false,
+      currentTime: 0,
+      duration: 0,
+      min: 0,
+      max: 0,
+      ready: false,
     };
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount(): void {
     this.videoNode?.destroy();
   }
 
-  play = () => {
+  play = (): void => {
     this.videoNode?.play();
     this.setState({ playing: true });
   };
 
-  pause = () => {
+  pause = (): void => {
     this.videoNode?.pause();
     this.setState({ playing: false });
   };
 
-  setPlayerCurrentTime(val: number) {
-    this.videoNode!.currentTime = val / 1000;
+  setPlayerCurrentTime(val: number): void {
+    if (this.videoNode) {
+      this.videoNode.currentTime = val / 1000;
+    }
   }
 
-  onLoadStart = () => {
-    const controls: any = ["volume", "mute", "duration"];
+  onLoadStart = (): void => {
+    const controls = ["volume", "mute", "duration"];
     this.videoNode = new Plyr(".video", {
       controls,
       keyboard: { focused: true, global: true },
     });
 
-    this.videoNode.on("timeupdate", (update) => {
-      let newTime = this.videoNode!.currentTime * 1000;
-      if (this.state.max && this.state.min && newTime > this.state.max) {
-        newTime = this.state.min;
-        this.videoNode!.currentTime = newTime / 1000;
+    this.videoNode.on("timeupdate", () => {
+      if (this.videoNode) {
+        let newTime = this.videoNode.currentTime * 1000;
+        if (this.state.max && this.state.min && newTime > this.state.max) {
+          newTime = this.state.min;
+
+          this.videoNode.currentTime = newTime / 1000;
+        }
+        this.setState({
+          currentTime: newTime,
+        });
       }
-      this.setState({
-        currentTime: newTime,
-      });
     });
-    this.videoNode?.on("pause", () => {
+    this.videoNode.on("pause", () => {
       this.setState({ playing: false });
     });
-    this.videoNode?.on("play", () => {
+    this.videoNode.on("play", () => {
       this.setState({ playing: true });
     });
-    this.videoNode?.on("ready", () => {
+    this.videoNode.on("ready", () => {
       this.videoNode?.pause();
       this.setState({ playing: false });
     });
-    this.videoNode?.on("canplay", () => {
-      if (!this.state.duration) {
+    this.videoNode.on("canplay", () => {
+      if (!this.state.ready && this.videoNode) {
         this.setState({
-          duration: this.videoNode!.duration * 1000,
+          duration: this.videoNode.duration * 1000,
           min: 0,
-          max: this.videoNode!.duration * 1000,
+          max: this.videoNode.duration * 1000,
+          ready: true,
         });
       }
     });
   };
 
-  sliderChange = (val: number) => {
-    if (this.videoNode && val >= this.state.min! && val <= this.state.max!) {
+  sliderChange = (val: number): void => {
+    if (
+      this.videoNode &&
+      val >= (this.state.min || 0) &&
+      val <= (this.state.max || Number.MAX_SAFE_INTEGER)
+    ) {
       this.setPlayerCurrentTime(val);
       this.setState({
         currentTime: val,
@@ -95,7 +111,7 @@ export class Editor extends React.Component<IProps, IState> {
     }
   };
 
-  rangeSliderChange = ([min, max]: number[]) => {
+  rangeSliderChange = ([min, max]: number[]): void => {
     if (
       (this.state.currentTime && this.state.currentTime < min) ||
       this.state.min !== min
@@ -114,15 +130,16 @@ export class Editor extends React.Component<IProps, IState> {
     this.setState({ min, max });
   };
 
-  onSave = () => {
+  onSave = (): void => {
     FFMPEG.save(this.props.filePath, {
       min: this.state.min || 0,
       max: this.state.max || 0,
+      outputType: "mp4",
     });
   };
 
-  render() {
-    const { playing, currentTime, duration, max, min } = this.state;
+  public render(): JSX.Element {
+    const { playing, currentTime, duration, max, min, ready } = this.state;
 
     return (
       <div className="editor">
@@ -133,28 +150,28 @@ export class Editor extends React.Component<IProps, IState> {
             onLoadStart={this.onLoadStart}
           ></video>
         </div>
-        {this.state.duration && this.state.duration > 0 && (
+        {ready && (
           <div className="control-container">
             <PlayButton
-              currentTime={currentTime!}
-              max={max!}
-              min={min!}
+              currentTime={currentTime}
+              max={max}
+              min={min}
               playing={playing}
               onPause={this.pause}
               onPlay={this.play}
             />
             <Progress
-              duration={duration!}
-              currentTime={currentTime!}
-              min={min!}
-              max={max!}
+              duration={duration}
+              currentTime={currentTime}
+              min={min}
+              max={max}
               onChange={this.sliderChange}
             />
             <Slider
               range
-              defaultValue={[0, duration!]}
+              defaultValue={[0, duration]}
               min={0}
-              max={duration!}
+              max={duration}
               onChange={this.rangeSliderChange}
               tipFormatter={(val) =>
                 Util.sliderFormatter(val, { displayMilliseconds: true })

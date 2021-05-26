@@ -4,6 +4,10 @@ export interface IFormatterOptions {
 }
 
 export class Util {
+  static isWindows(): boolean {
+    return process.platform === "win32";
+  }
+
   /** Format time in milliseconds */
   static sliderFormatter(
     duration?: number,

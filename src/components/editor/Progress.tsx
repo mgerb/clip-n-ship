@@ -17,7 +17,7 @@ export const Progress = ({
   min,
   max,
   onChange,
-}: IProps) => {
+}: IProps): JSX.Element => {
   const width = ((max - min) / duration) * 100;
   const left = min * (100 / duration);
   return (

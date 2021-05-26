@@ -4,38 +4,35 @@ import Layout from "antd/lib/layout/layout";
 import Text from "antd/lib/typography/Text";
 import React from "react";
 import "./App.scss";
-import { Editor } from "./components";
+import { Editor, Header } from "./components";
 
 interface IState {
   filePath?: string;
 }
 
-class App extends React.Component<any, IState> {
-  private dropListener: any;
-  private dragListener: any;
-
-  constructor(props: any) {
+class App extends React.Component<unknown, IState> {
+  constructor(props: unknown) {
     super(props);
     this.state = {};
   }
 
-  componentDidMount() {
-    this.dropListener = document.addEventListener("drop", (event) => {
-      const file: any = event.dataTransfer?.files[0];
-      if (file) {
-        this.onFileChange(file.path);
-      }
-    });
-    this.dragListener = document.addEventListener(
-      "dragover",
-      (event) => {
-        event.preventDefault();
-      },
-      false
-    );
+  public componentDidMount(): void {
+    document.addEventListener("drop", this.dropListener);
+    document.addEventListener("dragover", this.dragListener, false);
   }
 
-  componentWillUnmount() {
+  private dropListener = (event: DragEvent) => {
+    const file = event.dataTransfer?.files[0];
+    if (file) {
+      this.onFileChange(file.path);
+    }
+  };
+
+  private dragListener = (event: DragEvent) => {
+    event.preventDefault();
+  };
+
+  public componentWillUnmount(): void {
     document.removeEventListener("drop", this.dropListener);
     document.removeEventListener("dragover", this.dragListener);
   }
@@ -43,8 +40,8 @@ class App extends React.Component<any, IState> {
   private onFileClick = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.onchange = (e: any) => {
-      const file = e.target?.files[0];
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement)?.files?.[0];
       if (file) {
         this.onFileChange(file.path);
       }
@@ -70,11 +67,12 @@ class App extends React.Component<any, IState> {
     }
   }
 
-  render() {
+  public render(): JSX.Element {
     const { filePath } = this.state;
 
     return (
       <Layout style={{ height: "100%", paddingBottom: "1rem" }}>
+        <Header />
         {filePath ? (
           <Editor filePath={filePath} />
         ) : (

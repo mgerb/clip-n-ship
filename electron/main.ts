@@ -13,6 +13,7 @@ function createWindow() {
       nodeIntegrationInWorker: true,
       contextIsolation: false,
       webSecurity: false,
+      enableRemoteModule: true,
     },
     width: 800,
   });

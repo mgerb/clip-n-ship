@@ -19,7 +19,7 @@ export const PlayButton = ({
   onPause,
   onPlay,
   playing,
-}: IProps) => {
+}: IProps): JSX.Element => {
   return (
     <div
       style={{
