@@ -15,7 +15,6 @@ class _Settings {
 
     try {
       const f = fs.readFileSync(path.join(this.appDataPath, "settings.json"));
-      console.log(JSON.parse(f));
       Object.assign(this, JSON.parse(f));
     } catch (e) {
       // unable to read settings file

@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import * as path from "path";
+import { env } from "./env";
 
 let mainWindow: Electron.BrowserWindow;
 
@@ -19,7 +20,7 @@ function createWindow() {
   });
 
   // and load the index.html of the app.
-  if (process.env.NODE_ENV === "production") {
+  if ((env as unknown) === "prod") {
     mainWindow.loadFile(path.join(__dirname, "./index.html"));
   } else {
     // dev mode

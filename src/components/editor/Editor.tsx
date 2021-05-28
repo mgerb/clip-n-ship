@@ -1,6 +1,5 @@
 import { Button, Divider, Form, message, Select, Slider } from "antd";
 import Plyr from "plyr";
-import "plyr/dist/plyr.css";
 import React from "react";
 import { FFMPEG } from "../../services/ffmpeg";
 import { Settings } from "../../services/settings";

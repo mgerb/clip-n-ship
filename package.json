@@ -1,9 +1,10 @@
 {
-  "name": "create-react-app-typescript",
+  "name": "clip-n-ship",
+  "author": "mgerb",
+  "description": "Simple media clipping tool",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@ant-design/icons": "^4.6.2",
+  "devDependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^13.1.9",
@@ -14,16 +15,21 @@
     "@types/video.js": "^7.3.17",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
-    "antd": "^4.15.6",
-    "electron": "^12.0.9",
+    "electron-builder": "^22.10.5",
     "eslint": "^7.27.0",
     "node-sass": "^5.0.0",
     "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "electron": "^12.0.9"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^4.6.2",
+    "antd": "^4.15.6",
+    "ffmpeg-static": "^4.3.0",
     "plyr": "^3.6.8",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
-    "rimraf": "^3.0.2",
     "rxjs": "^7.1.0",
     "typescript": "^4.1.2",
     "video.js": "^7.11.8",
@@ -36,12 +42,14 @@
     "react:start": "react-scripts start",
     "react:build": "PUBLIC_URL=./ react-scripts build",
     "react:test": "react-scripts test",
-    "start": "run-p react:start electron:start",
+    "start": "cp env-dev.ts ./electron/env.ts && run-p react:start electron:start",
     "start:prod": "NODE_ENV=production electron ./build/main.js",
-    "build": "rimraf build && run-s react:build electron:build",
+    "build": "cp env-prod.ts ./electron/env.ts && rimraf build && run-s react:build electron:build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "eslintConfig": {
     "extends": [
@@ -59,6 +67,33 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "main": "./build/main.js",
+  "build": {
+    "appId": "clip-n-ship.id",
+    "mac": {
+      "category": "media"
+    },
+    "files": [
+      "build/**/*",
+      "package.json"
+    ],
+    "extends": null,
+    "win": {
+      "target": "nsis",
+      "icon": "./app/assets/icons/win/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true
+    },
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
+      "node_modules/ffmpeg-static/index.js",
+      "node_modules/ffmpeg-static/package.json"
     ]
   }
 }

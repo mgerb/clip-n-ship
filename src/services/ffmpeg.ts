@@ -4,6 +4,10 @@ import { Util } from "./util";
 const path = window.require("path");
 
 const { spawn } = window.require("child_process");
+// const ffmpegPath = window.require("ffmpeg-static");
+const ffmpegPath = window
+  .require("ffmpeg-static")
+  .replace("app.asar", "app.asar.unpacked");
 
 export interface IExportOptions {
   min: number;
@@ -31,7 +35,7 @@ export class FFMPEG {
       additionalOptions = ["-vf", "fps=10,scale=640:-1:flags=lanczos"];
     }
 
-    const proc = spawn(this.getExecutable(), [
+    const proc = spawn(ffmpegPath, [
       "-ss",
       one,
       "-y",
