@@ -1,8 +1,9 @@
-import { Button, Slider } from "antd";
+import { Button, Divider, Form, message, Select, Slider } from "antd";
 import Plyr from "plyr";
 import "plyr/dist/plyr.css";
 import React from "react";
 import { FFMPEG } from "../../services/ffmpeg";
+import { Settings } from "../../services/settings";
 import { Util } from "../../services/util";
 import "./Editor.scss";
 import { PlayButton } from "./PlayButton";
@@ -19,6 +20,8 @@ interface IState {
   max: number;
   playing: boolean;
   ready: boolean;
+  ffmpegOutput?: string;
+  ffmpegOutputFinished: boolean;
 }
 
 export class Editor extends React.Component<IProps, IState> {
@@ -33,6 +36,7 @@ export class Editor extends React.Component<IProps, IState> {
       min: 0,
       max: 0,
       ready: false,
+      ffmpegOutputFinished: false,
     };
   }
 
@@ -130,13 +134,61 @@ export class Editor extends React.Component<IProps, IState> {
     this.setState({ min, max });
   };
 
-  onSave = (): void => {
+  onFinish = ({
+    outputFormat,
+  }: {
+    [key: string]: "mp3" | "gif" | "mp4";
+  }): void => {
+    message.loading({ content: "Rendering...", key: "outputMessage" });
     FFMPEG.save(this.props.filePath, {
       min: this.state.min || 0,
       max: this.state.max || 0,
-      outputType: "mp4",
+      outputFormat,
+    }).subscribe({
+      next: (data: string) => {
+        this.setState({
+          ffmpegOutput: this.state.ffmpegOutput
+            ? this.state.ffmpegOutput + data + "\n"
+            : data + "\n",
+        });
+      },
+      complete: () => {
+        message.success({
+          content: "Saved to: " + Settings.getOutputDirectory(),
+          key: "outputMessage",
+          duration: 2,
+        });
+        this.setState({
+          ffmpegOutputFinished: true,
+        });
+      },
     });
   };
+
+  private renderForm(): JSX.Element {
+    return (
+      <div style={{ maxWidth: "300px" }}>
+        <Form onFinish={this.onFinish}>
+          <Form.Item
+            label="Output Format"
+            name="outputFormat"
+            initialValue={"mp4"}
+          >
+            <Select>
+              <Select.Option value="mp4">mp4</Select.Option>
+              <Select.Option value="gif">gif</Select.Option>
+              <Select.Option value="mp3">mp3</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+    );
+  }
 
   public render(): JSX.Element {
     const { playing, currentTime, duration, max, min, ready } = this.state;
@@ -178,7 +230,19 @@ export class Editor extends React.Component<IProps, IState> {
               }
             ></Slider>
 
-            <Button onClick={this.onSave}>Save</Button>
+            <Divider />
+
+            {this.renderForm()}
+            {!!this.state.ffmpegOutput && (
+              <>
+                <Divider orientation="left" plain>
+                  FFMPEG Output
+                </Divider>
+                <div style={{ whiteSpace: "pre-wrap" }}>
+                  {this.state.ffmpegOutput}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

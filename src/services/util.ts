@@ -43,4 +43,19 @@ export class Util {
     }
     return ret;
   }
+
+  static onFileClick = (filePath: (_: string) => void): void => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement)?.files?.[0];
+      if (file) {
+        filePath(file.path);
+      }
+      if (document.contains(input)) {
+        document.removeChild(input);
+      }
+    };
+    input.click();
+  };
 }

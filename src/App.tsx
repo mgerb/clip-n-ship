@@ -1,10 +1,10 @@
 import { UploadOutlined } from "@ant-design/icons";
-import { Button } from "antd";
 import Layout from "antd/lib/layout/layout";
 import Text from "antd/lib/typography/Text";
 import React from "react";
 import "./App.scss";
 import { Editor, Header } from "./components";
+import { Util } from "./services/util";
 
 interface IState {
   filePath?: string;
@@ -38,18 +38,9 @@ class App extends React.Component<unknown, IState> {
   }
 
   private onFileClick = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement)?.files?.[0];
-      if (file) {
-        this.onFileChange(file.path);
-      }
-      if (document.contains(input)) {
-        document.removeChild(input);
-      }
-    };
-    input.click();
+    Util.onFileClick((path) => {
+      this.onFileChange(path);
+    });
   };
 
   private onFileChange(path: string): void {
@@ -72,7 +63,7 @@ class App extends React.Component<unknown, IState> {
 
     return (
       <Layout style={{ height: "100%", paddingBottom: "1rem" }}>
-        <Header />
+        <Header onFileClick={this.onFileClick} />
         {filePath ? (
           <Editor filePath={filePath} />
         ) : (
@@ -87,16 +78,6 @@ class App extends React.Component<unknown, IState> {
               </Text>
             </h1>
           </div>
-        )}
-
-        {filePath && (
-          <Button
-            style={{ margin: "1rem" }}
-            icon={<UploadOutlined />}
-            onClick={this.onFileClick}
-          >
-            Choose File
-          </Button>
         )}
       </Layout>
     );

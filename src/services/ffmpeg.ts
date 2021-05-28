@@ -1,3 +1,4 @@
+import { Observable } from "rxjs";
 import { Settings } from "./settings";
 import { Util } from "./util";
 const path = window.require("path");
@@ -7,11 +8,11 @@ const { spawn } = window.require("child_process");
 export interface IExportOptions {
   min: number;
   max: number;
-  outputType: "mp4" | "mp3";
+  outputFormat: "mp4" | "mp3" | "gif";
 }
 
 export class FFMPEG {
-  static save(path: string, options: IExportOptions): Promise<void> {
+  static save(path: string, options: IExportOptions): Observable<string> {
     const one = Util.sliderFormatter(options.min, {
       displayHours: true,
       displayMilliseconds: true,
@@ -22,29 +23,38 @@ export class FFMPEG {
       displayMilliseconds: true,
     });
 
+    let additionalOptions: string[] = [];
+
+    // If gif we must downscale otherwise file will be huge.
+    // TODO: add these settings to output options.
+    if (options.outputFormat === "gif") {
+      additionalOptions = ["-vf", "fps=10,scale=640:-1:flags=lanczos"];
+    }
+
     const proc = spawn(this.getExecutable(), [
       "-ss",
       one,
       "-y",
       "-i",
       path,
+      ...additionalOptions,
       "-t",
       two,
       this.getOutputFileName(path, options),
     ]);
 
-    return new Promise((res) => {
+    return new Observable((o) => {
       proc.stdout.on("data", (data: unknown) => {
-        console.log(`stdout: ${data}`);
+        o.next(String(data));
       });
 
       proc.stderr.on("data", (data: unknown) => {
-        console.error(`stderr: ${data}`);
+        o.next(String(data));
       });
 
       proc.on("close", (code: unknown) => {
         console.log(`child process exited with code ${code}`);
-        res();
+        o.complete();
       });
     });
   }
@@ -59,7 +69,7 @@ export class FFMPEG {
       const out = fileName.split(".")[0];
       return path.join(
         Settings.getOutputDirectory(),
-        out + `-${new Date().getTime()}.` + options.outputType
+        out + `-${new Date().getTime()}.` + options.outputFormat
       );
     }
     return "";
